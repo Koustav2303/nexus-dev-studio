@@ -10,7 +10,6 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navContainerRef = useRef(null);
 
-  // GSAP Entry Animation for the whole Navbar
   useEffect(() => {
     gsap.fromTo(
       navContainerRef.current,
@@ -19,7 +18,6 @@ const Navbar = () => {
     );
   }, []);
 
-  // Prevent scroll artifacts when mobile view is active
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -29,17 +27,20 @@ const Navbar = () => {
   }, [isOpen]);
 
   return (
-    <header ref={navContainerRef} className="fixed top-0 left-0 w-full z-50 px-4 sm:px-8 pt-5">
-      {/* Floating glassmorphic wrapper */}
-      <nav className="max-w-7xl mx-auto h-20 px-6 sm:px-8 glass-card rounded-2xl flex items-center justify-between transition-all duration-300">
+    <header className="fixed top-0 left-0 w-full z-50 px-4 sm:px-8 pt-5">
+      <MobileMenu isOpen={isOpen} setIsOpen={setIsOpen} />
+
+      <nav
+        ref={navContainerRef}
+        className="relative z-[105] max-w-7xl mx-auto h-[4.5rem] sm:h-20 px-5 sm:px-8 glass-card rounded-2xl flex items-center justify-between gap-4 shadow-[0_8px_40px_rgba(0,0,0,0.45)] ring-1 ring-inset ring-white/[0.06] transition-all duration-300"
+      >
         <NavLogo />
         <NavLinks />
-        <NavAction />
-        <HamburgerButton isOpen={isOpen} toggleMenu={() => setIsOpen(!isOpen)} />
+        <div className="flex shrink-0 items-center gap-3 md:gap-0">
+          <NavAction />
+          <HamburgerButton isOpen={isOpen} toggleMenu={() => setIsOpen(!isOpen)} />
+        </div>
       </nav>
-      
-      {/* Detached Mobile Layer */}
-      <MobileMenu isOpen={isOpen} setIsOpen={setIsOpen} />
     </header>
   );
 };

@@ -1,16 +1,10 @@
 import React from 'react';
-
-const links = [
-  { name: 'Services', href: '#services' },
-  { name: 'Capabilities', href: '#capabilities' },
-  { name: 'Stack', href: '#stack' },
-  { name: 'Work', href: '#work' },
-];
+import { NAV_LINKS } from './navConfig';
 
 const NavLinks = () => {
   return (
     <ul className="hidden md:flex items-center gap-10">
-      {links.map((link) => (
+      {NAV_LINKS.map((link) => (
         <li key={link.name}>
           <a
             href={link.href}

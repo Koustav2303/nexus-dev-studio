@@ -1,73 +1,112 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-
-const mobileLinks = [
-  { name: 'Services', href: '#services' },
-  { name: 'Capabilities', href: '#capabilities' },
-  { name: 'Stack', href: '#stack' },
-  { name: 'Work', href: '#work' },
-  { name: 'Initiate Project', href: '#contact', isCta: true },
-];
+import { NAV_LINKS, CTA } from './navConfig';
 
 const MobileMenu = ({ isOpen, setIsOpen }) => {
-  const overlayRef = useRef(null);
-  const linksRef = useRef([]);
+  const backdropRef = useRef(null);
+  const panelRef = useRef(null);
 
   useEffect(() => {
-    // GSAP visibility and animation logic
+    const backdrop = backdropRef.current;
+    const panel = panelRef.current;
+    if (!backdrop || !panel) return;
+    gsap.set(backdrop, { autoAlpha: 0, pointerEvents: 'none' });
+    gsap.set(panel, { xPercent: 100, pointerEvents: 'none' });
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
     if (isOpen) {
-      gsap.to(overlayRef.current, {
-        duration: 0.4,
-        autoAlpha: 1, // handles visibility and opacity simultaneously
-        ease: 'power3.out',
+      window.addEventListener('keydown', onKeyDown);
+    }
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, setIsOpen]);
+
+  useEffect(() => {
+    const backdrop = backdropRef.current;
+    const panel = panelRef.current;
+    if (!backdrop || !panel) return;
+
+    if (isOpen) {
+      gsap.set([backdrop, panel], { pointerEvents: 'auto' });
+      gsap.to(backdrop, {
+        autoAlpha: 1,
+        duration: 0.35,
+        ease: 'power2.out',
       });
       gsap.fromTo(
-        linksRef.current,
-        { y: 40, opacity: 0 },
-        {
-          duration: 0.5,
-          y: 0,
-          opacity: 1,
-          stagger: 0.06,
-          ease: 'power2.out',
-          delay: 0.15,
-        }
+        panel,
+        { xPercent: 100 },
+        { xPercent: 0, duration: 0.45, ease: 'power3.out' }
       );
     } else {
-      gsap.to(overlayRef.current, {
-        duration: 0.3,
+      gsap.to(backdrop, {
         autoAlpha: 0,
+        duration: 0.28,
+        ease: 'power2.in',
+      });
+      gsap.to(panel, {
+        xPercent: 100,
+        duration: 0.38,
         ease: 'power3.in',
+        onComplete: () => {
+          gsap.set([backdrop, panel], { pointerEvents: 'none' });
+        },
       });
     }
   }, [isOpen]);
 
   return (
-    <div
-      ref={overlayRef}
-      className="fixed inset-0 z-40 invisible md:hidden bg-pureBlack/90 backdrop-blur-xl flex flex-col justify-center items-center px-6"
-    >
-      <ul className="flex flex-col items-center gap-8 w-full max-w-sm">
-        {mobileLinks.map((link, index) => (
-          <li
-            key={link.name}
-            ref={(el) => (linksRef.current[index] = el)}
-            className="w-full text-center"
-          >
+    <div className="md:hidden" aria-hidden={!isOpen}>
+      <div
+        ref={backdropRef}
+        role="presentation"
+        className="fixed inset-0 z-[100] bg-pureBlack/80 backdrop-blur-md opacity-0 invisible pointer-events-none"
+        onClick={() => setIsOpen(false)}
+      />
+      <aside
+        id="mobile-nav-drawer"
+        ref={panelRef}
+        className="fixed right-0 bottom-0 z-[102] flex w-full max-w-sm flex-col border-l border-t border-white/[0.12] rounded-tl-2xl bg-[#070707] shadow-[-24px_0_48px_rgba(0,0,0,0.55)] pointer-events-none top-[calc(1.25rem+4.5rem)] sm:top-[calc(1.25rem+5rem)]"
+        aria-label="Mobile navigation"
+      >
+        <div className="border-b border-white/[0.08] px-6 py-5">
+          <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-white/45">
+            Navigate
+          </p>
+          <p className="mt-1 text-sm font-medium text-pureWhite">Nexus Dev Studio</p>
+        </div>
+
+        <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-4 py-6">
+          {NAV_LINKS.map((link, index) => (
             <a
+              key={link.name}
               href={link.href}
               onClick={() => setIsOpen(false)}
-              className={`block text-2xl font-light tracking-wider transition-all duration-200 ${
-                link.isCta
-                  ? 'mt-6 py-3.5 px-8 bg-pureWhite text-pureBlack font-semibold text-sm tracking-widest uppercase rounded-full'
-                  : 'text-white/60 hover:text-pureWhite'
-              }`}
+              className="group flex items-center gap-4 rounded-xl px-4 py-3.5 text-pureWhite opacity-100 transition-colors hover:bg-white/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-pureWhite/40"
             >
-              {link.name}
+              <span className="font-mono text-[11px] text-white/50 transition-colors group-hover:text-white/70">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <span className="text-lg font-semibold tracking-tight text-pureWhite">
+                {link.name}
+              </span>
             </a>
-          </li>
-        ))}
-      </ul>
+          ))}
+        </nav>
+
+        <div className="border-t border-white/[0.08] p-4">
+          <a
+            href={CTA.href}
+            onClick={() => setIsOpen(false)}
+            className="flex w-full items-center justify-center rounded-full bg-pureWhite px-6 py-3.5 text-xs font-bold uppercase tracking-[0.2em] text-pureBlack transition-transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-pureWhite focus-visible:ring-offset-2 focus-visible:ring-offset-[#070707]"
+          >
+            {CTA.name}
+          </a>
+        </div>
+      </aside>
     </div>
   );
 };
